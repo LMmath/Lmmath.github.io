@@ -21,24 +21,20 @@
         REDIRECT_DELAY: 2000 // ms
     };
 
-    // === UTILS ===
     function getCurrentUtcIso() {
         return new Date().toISOString().replace('T', ' ').substring(0, 19);
     }
 
-    // Don't run on verification page itself (index.html or /)
-    var here = window.location.pathname.replace(/\\/g, "/");
-    if (
-        here.endsWith("/") ||
-        here.endsWith("/index.html") ||
-        here === "/index.html"
-    ) {
-        // If on verification page, provide the full process (extension check etc.)
-        document.addEventListener("DOMContentLoaded", runVerificationPage);
-        return;
-    } else {
-        // On protected page, guard access
-        document.addEventListener("DOMContentLoaded", runProtectedPageCheck);
+    // Helper: test if on verification page (index.html or /)
+    function isVerificationPage() {
+        var here = window.location.pathname.replace(/\\/g, "/");
+        // Accepts /, /index.html, index.html, etc
+        return (
+            here === "/" ||
+            here.endsWith("/index.html") ||
+            here === "/index.html" ||
+            here === "index.html"
+        );
     }
 
     // === GUARD LOGIC FOR PROTECTED PAGES ===
@@ -80,7 +76,6 @@
         document.body.appendChild(overlay);
 
         setTimeout(function () {
-            // Save attempted page for return after verification
             var returnUrl = encodeURIComponent(window.location.href);
             window.location.href = CONFIG.VERIFICATION_PAGE + "?returnUrl=" + returnUrl;
         }, CONFIG.REDIRECT_DELAY);
@@ -167,6 +162,8 @@
         updateUIAfterVerification("failed", statusElement, spinner, document.querySelector('.progress-fill'));
     }
 
+    // --- FIX: Use <img> for extension check, not fetch ---
+    // Many browsers block fetch HEAD/XHR to chrome-extension:// URLs, but <img> onerror/onload works!
     function checkExtensions() {
         var statusElement = document.getElementById('status');
         var spinner = document.getElementById('spinner');
@@ -186,25 +183,41 @@
         var checked = 0;
         var validExtensions = [];
 
-        // For progress bar and extension check
+        // Use <img> for extension resource checking
         entries.forEach(([name, url], idx) => {
-            fetch(url, { method: 'HEAD' })
-                .then(() => validExtensions.push(name))
-                .catch(() => {})
-                .finally(() => {
-                    checked++;
-                    var progress = Math.min((checked / entries.length) * 100, 100);
-                    if (progressFill) progressFill.style.width = `${progress}%`;
+            var img = new Image();
+            // Give a unique param to avoid caching issues
+            img.src = url + (url.indexOf("?") === -1 ? "?" : "&") + "v=" + Date.now();
 
-                    if (checked === entries.length) {
-                        // All checks done
-                        if (validExtensions.length >= CONFIG.REQUIRED_EXTENSIONS) {
-                            handleVerificationSuccess(validExtensions, spinner, success, statusElement);
-                        } else {
-                            handleVerificationFailure(validExtensions, spinner, failure, statusElement);
-                        }
+            img.onload = function () {
+                validExtensions.push(name);
+                step();
+            };
+            img.onerror = function () {
+                step();
+            };
+            // In case onerror/onload never fires (extreme), set a timeout fallback
+            setTimeout(() => {
+                if (img.complete === false) {
+                    step();
+                }
+            }, 3000);
+
+            function step() {
+                if (img._checked) return;
+                img._checked = true;
+                checked++;
+                var progress = Math.min((checked / entries.length) * 100, 100);
+                if (progressFill) progressFill.style.width = `${progress}%`;
+                if (checked === entries.length) {
+                    // All checks done
+                    if (validExtensions.length >= CONFIG.REQUIRED_EXTENSIONS) {
+                        handleVerificationSuccess(validExtensions, spinner, success, statusElement);
+                    } else {
+                        handleVerificationFailure(validExtensions, spinner, failure, statusElement);
                     }
-                });
+                }
+            }
         });
     }
 
@@ -246,10 +259,12 @@
     }
 
     function addVerificationCheck() {
-        if (window.location.pathname === "/" || window.location.pathname.endsWith("/index.html")) {
+        // Only run verification logic on the verification page itself
+        if (isVerificationPage()) {
             checkExtensions();
             return;
         }
+        // Otherwise, show overlay if not verified
         if (!checkVerificationStatus()) {
             showVerificationMessage();
         } else {
@@ -265,5 +280,12 @@
     function runVerificationPage() {
         // Attach for index.html only
         addVerificationCheck();
+    }
+
+    // --- Script entry points ---
+    if (isVerificationPage()) {
+        document.addEventListener("DOMContentLoaded", runVerificationPage);
+    } else {
+        document.addEventListener("DOMContentLoaded", runProtectedPageCheck);
     }
 })();
