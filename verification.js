@@ -16,7 +16,7 @@ const CONFIG = {
     DEFAULT_REDIRECT: "./h.html",
     CURRENT_USER: "Scaroontop",
     CURRENT_UTC_TIME: "2025-03-23 01:09:54",
-    REQUIRED_EXTENSIONS: 5,
+    REQUIRED_EXTENSIONS: 1,
     VERIFICATION_DURATION: 24 * 60 * 60 * 1000 // 24 hours in milliseconds
 };
 
