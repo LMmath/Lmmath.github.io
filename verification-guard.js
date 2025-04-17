@@ -7,7 +7,7 @@
         VERIFICATION_PAGE: "index.html", // The page to redirect to for verification
         DEFAULT_REDIRECT: "./h.html",    // Redirect after verification
         CURRENT_USER: "Scaroontop",      // Default username, can be replaced
-        REQUIRED_EXTENSIONS: 2,          // How many extensions are required
+        REQUIRED_EXTENSIONS: 1,          // How many extensions are required
         VERIFICATION_DURATION: 24 * 60 * 60 * 1000, // 24 hours
         EXTENSIONS: {
             "no-direct-ip": "chrome-extension://hacaeeoapmdgmhifjcgbblcobgnmceff/icons/block.png",
