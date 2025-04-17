@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extension Verification</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="verification-box">
+            <div class="logo">
+                <img src="https://via.placeholder.com/120" alt="Verification Logo">
+            </div>
+            <h1>Extension Verification</h1>
+            
+            <div id="user-info" class="user-info">
+                Checking user: Scaroontop
+            </div>
+            
+            <div class="status-container">
+                <p id="status">Checking for required extensions...</p>
+                <div class="progress-wrapper">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+                <div id="spinner" class="spinner"></div>
+            </div>
+
+            <div id="success" class="status-message hidden">
+                <div class="icon success-icon">
+                    <svg viewBox="0 0 24 24" width="40" height="40">
+                        <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                    </svg>
+                </div>
+                <p class="message">Successfully verified!</p>
+                <p class="submessage">Redirecting you in a moment...</p>
+            </div>
+            
+            <div id="failure" class="status-message hidden">
+                <div class="icon failure-icon">
+                    <svg viewBox="0 0 24 24" width="40" height="40">
+                        <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+                    </svg>
+                </div>
+                <p class="message">Verification Failed</p>
+                <p class="submessage">Required extensions not found.</p>
+            </div>
+
+            <div id="already-verified" class="status-message hidden">
+                <div class="icon verified-icon">
+                    <svg viewBox="0 0 24 24" width="40" height="40">
+                        <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-2h2v2h-2zm0-10v6h2V7h-2z"/>
+                    </svg>
+                </div>
+                <p class="message">Already Verified</p>
+                <p class="submessage">You're good to go!</p>
+            </div>
+        </div>
+    </div>
+    <script src="verification.js"></script>
+</body>
+</html>
