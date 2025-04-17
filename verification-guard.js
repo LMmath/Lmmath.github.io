@@ -43,14 +43,20 @@
 
   function blockAndRedirect() {
     if (document.getElementById(CONFIG.OVERLAY_ID)) return;
+    // Cover the entire window (even if in iframe)
     var overlay = document.createElement("div");
     overlay.id = CONFIG.OVERLAY_ID;
     Object.assign(overlay.style, {
       position: "fixed",
-      inset: "0",
-      background: "rgba(0,0,0,0.93)",
+      top: "0",
+      left: "0",
+      width: "100vw",
+      height: "100vh",
+      minHeight: "100vh",
+      minWidth: "100vw",
+      background: "rgba(0,0,0,0.98)",
       color: "white",
-      zIndex: "999999",
+      zIndex: "2147483647", // max z-index for absolute covering
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
@@ -58,12 +64,16 @@
       fontSize: "2rem"
     });
     overlay.innerHTML = `
-      <div>
-        <strong>Please verify</strong>
-        <div style="margin-top:1em;font-size:1rem;">You must complete verification to access this page.</div>
-        <div style="margin-top:2em;font-size:0.9rem;opacity:0.7;">Redirecting to verification page...</div>
+      <div style="text-align:center;">
+        <strong style="font-size:2.4rem;">Please verify</strong>
+        <div style="margin-top:1em;font-size:1.15rem;">You must complete verification to access this page.</div>
+        <div style="margin-top:2em;font-size:1rem;opacity:0.7;">Redirecting to verification page...</div>
       </div>
     `;
+    // Remove all body children (super secure block)
+    while (document.body.firstChild) {
+      document.body.removeChild(document.body.firstChild);
+    }
     document.body.appendChild(overlay);
 
     setTimeout(function () {
@@ -96,26 +106,20 @@
     }
 
     entries.forEach(([name, url]) => {
-      var img = new Image();
-      img.onload = function () {
-        validExtensions.push(name);
-        step();
-      };
-      img.onerror = function () {
-        step();
-      };
-      // timeout fallback in case neither fires
-      setTimeout(() => step(), 1500);
+      var img = new window.Image();
+      var done = false;
+      img.onload = function () { if (!done) { validExtensions.push(name); done = true; step(); } };
+      img.onerror = function () { if (!done) { done = true; step(); } };
+      setTimeout(() => { if (!done) { done = true; step(); } }, 1500);
+      // Avoid cache
+      img.src = url + (url.indexOf("?") === -1 ? "?" : "&") + "v=" + Date.now();
 
       function step() {
-        if (img._checked) return;
-        img._checked = true;
         checked++;
         if (checked === entries.length) {
           callback(validExtensions);
         }
       }
-      img.src = url + (url.indexOf("?") === -1 ? "?" : "&") + "v=" + Date.now();
     });
   }
 
@@ -146,11 +150,31 @@
   }
 
   function updateUIAfterVerification(status, statusElement) {
-    if (statusElement) statusElement.textContent =
-      status === "verified" ? "Verification successful!" :
-      status === "failed" ? "Verification failed" :
-      "Already verified";
-    setTimeout(redirectToPage, 1500);
+    var successElement = document.getElementById('success');
+    var failureElement = document.getElementById('failure');
+    var alreadyVerifiedElement = document.getElementById('already-verified');
+    var spinner = document.getElementById('spinner');
+    var progressFill = document.querySelector('.progress-fill');
+
+    if (spinner) spinner.classList.add('hidden');
+    if (progressFill) progressFill.style.width = '100%';
+
+    switch (status) {
+      case "verified":
+        if (successElement) successElement.classList.remove('hidden');
+        if (statusElement) statusElement.textContent = "Verification successful!";
+        setTimeout(redirectToPage, 2000);
+        break;
+      case "failed":
+        if (failureElement) failureElement.classList.remove('hidden');
+        if (statusElement) statusElement.textContent = "Verification failed";
+        break;
+      case "already-verified":
+        if (alreadyVerifiedElement) alreadyVerifiedElement.classList.remove('hidden');
+        if (statusElement) statusElement.textContent = "Already verified";
+        setTimeout(redirectToPage, 1500);
+        break;
+    }
   }
 
   function handleVerificationSuccess(validExtensions, statusElement) {
@@ -179,11 +203,35 @@
       return;
     }
     if (statusElement) statusElement.textContent = "Checking for required extensions...";
-    checkExtensions(function (validExtensions) {
-      if (validExtensions.length >= CONFIG.REQUIRED_EXTENSIONS) {
-        handleVerificationSuccess(validExtensions, statusElement);
-      } else {
-        handleVerificationFailure(validExtensions, statusElement);
+    var progressFill = document.querySelector('.progress-fill');
+    var entries = Object.entries(CONFIG.EXTENSIONS);
+    if (progressFill) progressFill.style.width = '0%';
+
+    var checked = 0;
+    var validExtensions = [];
+    if (entries.length === 0) {
+      handleVerificationFailure([], statusElement);
+      return;
+    }
+    entries.forEach(([name, url], idx) => {
+      var img = new window.Image();
+      var done = false;
+      img.onload = function () { if (!done) { validExtensions.push(name); done = true; step(); } };
+      img.onerror = function () { if (!done) { done = true; step(); } };
+      setTimeout(() => { if (!done) { done = true; step(); } }, 1500);
+      img.src = url + (url.indexOf("?") === -1 ? "?" : "&") + "v=" + Date.now();
+
+      function step() {
+        checked++;
+        var progress = Math.min((checked / entries.length) * 100, 100);
+        if (progressFill) progressFill.style.width = `${progress}%`;
+        if (checked === entries.length) {
+          if (validExtensions.length >= CONFIG.REQUIRED_EXTENSIONS) {
+            handleVerificationSuccess(validExtensions, statusElement);
+          } else {
+            handleVerificationFailure(validExtensions, statusElement);
+          }
+        }
       }
     });
   }
