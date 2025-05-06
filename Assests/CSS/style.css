@@ -1,15 +1,10 @@
 /* All Files */
-
-
-
 * {
 
   overflow-x: scroll;
   overflow: -moz-scrollbars-none;
 }
-
-
-  .Normal-Button img {
+.Normal-Button img {
     width: 24px;
     align-items: center;
     display: flex;
@@ -34,20 +29,8 @@
   position: absolute;
   transform: translate(15%);
 }
-.Navigation-Button a {
-  display: flex;
-  padding: 0.75em;
-  align-items: center;
-  gap: 5px;
-  color: var(--text-color1);
-  background-color: var(--btn-accent);
-  border-radius: var(--btn-rounding);
-  border: 1px solid var(--btn-accent);
-}
-.Navigation-Button a:hover {
-  border: 1px solid var(--nav-box-hover);
-  transition: 0.75s;
-}
+
+
 
 /* Index Page */
 
