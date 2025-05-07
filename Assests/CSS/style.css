@@ -42,10 +42,7 @@
   top: 50%;
   color: var(--text-color1);
 }
-.Index-Container div h1 {
-  font-size: 5em;
-  text-shadow: 0 10px 5px var(--text-shadow);
-}
+
 .Index-SplashText {
   margin-bottom: 30px;
   text-shadow: 0 5px 5px var(--text-shadow);
