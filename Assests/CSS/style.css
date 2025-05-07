@@ -9,29 +9,6 @@
     align-items: center;
     display: flex;
   }
-
-/* Navigation Bar */
-.Navigation-Image img {
-  margin-top: 5px;
-  height: 36px;
-  padding: 0.5em;
-  padding-left: 1.25em;
-}
-.Navigation-Image:hover {
-  animation: shake 5s;
-}
-.Navigation-Container {
-  flex-direction: row;
-}
-.Navigation-Container ul {
-  gap: 15px;
-  display: flex;
-  position: absolute;
-  transform: translate(15%);
-}
-
-
-
 /* Index Page */
 
 .Index-Container {
@@ -162,68 +139,4 @@
   margin: 5px 10px;
 }
 
-/* Animations */
 
-@keyframes shake {
-  0% {
-    transform: translate(1px, 1px) rotate(0deg);
-  }
-  10% {
-    transform: translate(-1px, -2px) rotate(-1deg);
-  }
-  20% {
-    transform: translate(-3px, 0px) rotate(1deg);
-  }
-  30% {
-    transform: translate(3px, 2px) rotate(0deg);
-  }
-  40% {
-    transform: translate(1px, -1px) rotate(1deg);
-  }
-  50% {
-    transform: translate(-1px, 2px) rotate(-1deg);
-  }
-  60% {
-    transform: translate(-3px, 1px) rotate(0deg);
-  }
-  70% {
-    transform: translate(3px, 1px) rotate(-1deg);
-  }
-  80% {
-    transform: translate(-1px, -1px) rotate(1deg);
-  }
-  90% {
-    transform: translate(1px, 2px) rotate(0deg);
-  }
-  100% {
-    transform: translate(1px, -2px) rotate(-1deg);
-  }
-}
-@keyframes move-down {
-  0% {
-    margin-top: -2rem;
-    opacity: 0;
-  }
-  70% {
-    margin-top: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-@keyframes zoom-in-fade {
-  0% {
-    scale: 0;
-    opacity: 0;
-  }
-  100% {
-    scale: 1;
-    opacity: 1;
-  }
-}
-
-/* Important */
-
-.hidden {
-  display: none !important;
-}
